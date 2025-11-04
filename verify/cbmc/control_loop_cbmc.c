@@ -1,4 +1,5 @@
 #include "../../src/control_loop.h"
+#include "../../include/project_config.h"
 
 /*
  * CBMC will provide this symbol. It represents an arbitrary float.
@@ -18,21 +19,21 @@ int main(void) {
     float dt = nondet_float();
 
     /**
-     * Tighten environment assumptions to verify sensor range is within 0..100 and
-     * dt is between 1ms..10ms (100 Hz..1kHz)
+     * Tighten environment assumptions to verify sensor range is within
+     * our pre-set ranges
      */
-    __CPROVER_assume(setpoint >= 0.0f && setpoint <= 100.0f);
-    __CPROVER_assume(measured >= 0.0f && measured <= 100.0f);
-    __CPROVER_assume(dt >= 0.001f && dt <= 0.01f);
+    __CPROVER_assume(setpoint >= CFG_SENSOR_MIN && setpoint <= CFG_SENSOR_MAX);
+    __CPROVER_assume(measured >= CFG_SENSOR_MIN && measured <= CFG_SENSOR_MAX);
+    __CPROVER_assume(dt >= CFG_DT_MIN && dt <= CFG_DT_MAX);
 
     // Run exactly one control step.
     pid_step(&pid, setpoint, measured, dt);
 
-    __CPROVER_assert(pid.duty_cycle >= 0.0f, "duty_cycle is lower-bounded");
-    __CPROVER_assert(pid.duty_cycle <= 1.0f, "duty_cycle is upper-bounded");
+    __CPROVER_assert(pid.duty_cycle >= CFG_PWM_MIN, "duty_cycle is lower-bounded");
+    __CPROVER_assert(pid.duty_cycle <= CFG_PWM_MAX, "duty_cycle is upper-bounded");
 
     // Check that the integral stayed within the applied clamp.
-    __CPROVER_assert(pid.integral >= -500.0f && pid.integral <= 500.0f,
+    __CPROVER_assert(pid.integral >= CFG_INTEGRAL_MIN && pid.integral <= CFG_INTEGRAL_MAX,
                         "integral is within clamp range");
     
     return 0;
