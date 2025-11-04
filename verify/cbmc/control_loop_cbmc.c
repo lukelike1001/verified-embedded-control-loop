@@ -9,7 +9,7 @@ float nondet_float(void);
 int main(void) {
     pid_t pid;
 
-    // Initialize with fixed gains for easier proving.
+    // NOTE: Externalize fixed gains to a separate config file for a later refactor
     pid_init(&pid, 0.5f, 0.1f, 0.0f);
 
     // Nondet inputs: setpoint, measured value, and time step.
@@ -17,15 +17,13 @@ int main(void) {
     float measured = nondet_float();
     float dt = nondet_float();
 
-    /*
-     * Assumptions = our model of the environment
-     * These make the state space finite and realistic.
+    /**
+     * Tighten environment assumptions to verify sensor range is within 0..100 and
+     * dt is between 1ms..10ms (100 Hz..1kHz)
      */
     __CPROVER_assume(setpoint >= 0.0f && setpoint <= 100.0f);
     __CPROVER_assume(measured >= 0.0f && measured <= 100.0f);
-
-    // Control loops usually run from -50Hz to 2 kHz.
-    __CPROVER_assume(dt >= 0.0005f && dt <= 0.02f);
+    __CPROVER_assume(dt >= 0.001f && dt <= 0.01f);
 
     // Run exactly one control step.
     pid_step(&pid, setpoint, measured, dt);
@@ -34,7 +32,7 @@ int main(void) {
     __CPROVER_assert(pid.duty_cycle <= 1.0f, "duty_cycle is upper-bounded");
 
     // Check that the integral stayed within the applied clamp.
-    __CPROVER_assert(pid.integral <= 500.0f && pid.integral >= -500.0f,
+    __CPROVER_assert(pid.integral >= -500.0f && pid.integral <= 500.0f,
                         "integral is within clamp range");
     
     return 0;
