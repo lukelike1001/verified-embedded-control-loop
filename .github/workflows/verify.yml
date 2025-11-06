@@ -22,4 +22,4 @@ jobs:
       - name: Run CBMC harnesses
         run: |
           chmod +x run_cbmc.sh
-          run_cbmc.sh
+          ./run_cbmc.sh
