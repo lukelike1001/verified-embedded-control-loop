@@ -31,7 +31,8 @@ int main(void) {
         __CPROVER_assert(pid.duty_cycle <= CFG_PWM_MAX, "duty_cycle upper-bounded");
 
         // Integral should never escape the clamp
-        __CPROVER_assert(pid.integral >= CFG_INTEGRAL_MIN && pid.integral <= CFG_INTEGRAL_MAX);
+        __CPROVER_assert(pid.integral >= CFG_INTEGRAL_MIN && pid.integral <= CFG_INTEGRAL_MAX,
+            "integral bounded");
 
     }
 

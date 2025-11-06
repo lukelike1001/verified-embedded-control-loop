@@ -16,4 +16,13 @@
 #define CFG_PWM_MIN 0.0f
 #define CFG_PWM_MAX 1.0f
 
+#define CFG_KP_MIN 0.0f
+#define CFG_KP_MAX 2.0f
+
+#define CFG_KI_MIN 0.0f
+#define CFG_KI_MAX 1.0f
+
+#define CFG_KD_MIN 0.0f
+#define CFG_KD_MAX 0.5f
+
 #endif
